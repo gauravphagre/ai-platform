@@ -1,0 +1,4 @@
+.idea
+data/
+frontend/node_modules
+security/trivy
