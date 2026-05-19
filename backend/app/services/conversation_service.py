@@ -2,7 +2,7 @@ from sqlalchemy import select
 
 from app.db.models import Conversation
 from app.db.models import Message
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class ConversationService:
 
@@ -43,16 +43,13 @@ class ConversationService:
 
     async def get_messages(
         self,
-        db,
-        conversation_id
+        db: AsyncSession,
+        conversation_id: int
     ):
-
         result = await db.execute(
             select(Message)
-            .where(
-                Message.conversation_id == conversation_id
-            )
-            .order_by(Message.created_at)
+            .where(Message.conversation_id == conversation_id)
+            .order_by(Message.created_at.asc())
         )
 
         return result.scalars().all()

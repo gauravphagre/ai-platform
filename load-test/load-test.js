@@ -2,8 +2,9 @@ import http from "k6/http";
 import { sleep, check } from "k6";
 
 export const options = {
-  vus: 10,
-  duration: "365d",
+  iterations: 20,
+  vus: 5,
+  duration: "30s",
 
   thresholds: {
     http_req_failed: ["rate<0.05"],
@@ -27,9 +28,15 @@ export default function () {
   const prompt =
     prompts[Math.floor(Math.random() * prompts.length)];
 
-  const payload = JSON.stringify({
-    prompt: prompt
-  });
+    const payload = JSON.stringify({
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      model: "qwen2.5-coder:7b"
+    });
 
   const params = {
     headers: {

@@ -69,12 +69,11 @@ services:
       - ai-net
 
   load-tester:
-    build:
-      context: ./load-test
-    container_name: load-tester
+    build: ./load-test
+    profiles:
+      - loadtest
     depends_on:
       - backend
-    restart: unless-stopped
     networks:
       - ai-net
 
