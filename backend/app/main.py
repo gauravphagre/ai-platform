@@ -14,6 +14,8 @@ from app.observability.telemetry import setup_telemetry
 from app.db.database import engine
 from app.db.database import Base
 
+from app.routes.conversations import router as conversations_router
+
 # Configure logger
 logging.basicConfig(level=logging.INFO)
 
@@ -48,6 +50,7 @@ app.add_middleware(
 
 app.include_router(chat_router)
 
+app.include_router(conversations_router)
 
 @app.get("/")
 def home():
