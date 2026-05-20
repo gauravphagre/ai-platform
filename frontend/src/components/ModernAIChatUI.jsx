@@ -51,8 +51,7 @@ export default function ModernAIChatUI() {
 
       const data = await response.json();
 
-      // Show only latest 5
-      setConversations(data.slice(0, 5));
+      setConversations(data.slice(0, 10));
 
     } catch (error) {
 
@@ -117,7 +116,7 @@ export default function ModernAIChatUI() {
 
     const currentInput = input;
 
-    // Clear immediately
+    // Clear input immediately
     setInput("");
 
     const userMessage = {
@@ -125,7 +124,9 @@ export default function ModernAIChatUI() {
       content: currentInput
     };
 
-    // Instant UI update
+    // =========================================
+    // UPDATE UI IMMEDIATELY
+    // =========================================
     setMessages(prev => [
       ...prev,
       userMessage
@@ -134,6 +135,19 @@ export default function ModernAIChatUI() {
     setLoading(true);
 
     try {
+
+      // =========================================
+      // BUILD FULL CONTEXT
+      // =========================================
+      const fullConversation = [
+        ...messages.filter(
+          msg => msg.role !== "system"
+        ),
+        {
+          role: "user",
+          content: currentInput
+        }
+      ];
 
       const response = await fetch(
         "http://localhost:8000/chat",
@@ -149,6 +163,9 @@ export default function ModernAIChatUI() {
             model: "qwen2.5-coder:7b",
             stream: false,
 
+            // =========================================
+            // SEND FULL CHAT HISTORY
+            // =========================================
             messages: [
               {
                 role: "user",
@@ -161,7 +178,9 @@ export default function ModernAIChatUI() {
 
       const data = await response.json();
 
-      // Save conversation ID
+      // =========================================
+      // SAVE CONVERSATION ID
+      // =========================================
       if (!activeConversationId && data.conversation_id) {
 
         setActiveConversationId(
@@ -171,6 +190,9 @@ export default function ModernAIChatUI() {
         fetchConversations();
       }
 
+      // =========================================
+      // APPEND AI RESPONSE
+      // =========================================
       const assistantMessage = {
         role: "assistant",
         content: data.response
@@ -203,7 +225,6 @@ export default function ModernAIChatUI() {
 
   // =========================================
   // ENTER TO SEND
-  // SHIFT+ENTER FOR NEWLINE
   // =========================================
   const handleKeyDown = (e) => {
 
@@ -341,7 +362,7 @@ export default function ModernAIChatUI() {
                   text-zinc-500
                   mt-1
                 ">
-                  Persistent session
+                  Conversation #{conversation.id}
                 </div>
 
               </button>

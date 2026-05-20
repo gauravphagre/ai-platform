@@ -10,7 +10,8 @@ from app.observability.metrics import count_tokens
 from app.observability.logger import log_event
 from app.core.dependencies import get_db
 from app.services.conversation_service import ConversationService
-
+from fastapi.responses import StreamingResponse
+import json
 
 router = APIRouter()
 
@@ -76,46 +77,63 @@ async def chat(
         # LLM CALL
         # ---------------------------
         try:
-            with tracer.start_as_current_span("llm.generate_response"):
                 # ---------------------------
                 # BUILD FULL CONVERSATION CONTEXT
                 # ---------------------------
 
-                with tracer.start_as_current_span("db.fetch_conversation_history"):
-                    history = await conversation_service.get_messages(
-                        db,
-                        conversation_id
-                    )
-                    print("HISTORY:")
-                    for msg in history:
-                        print(msg.role, "=>", msg.content)
+            with tracer.start_as_current_span("db.fetch_conversation_history"):
+                history = await conversation_service.get_messages(
+                    db,
+                    conversation_id
+                )
+                print("HISTORY:")
+                for msg in history:
+                    print(msg.role, "=>", msg.content)
 
-                messages = [
-                    {
-                        "role": "system",
-                        "content": "You are a helpful AI inside ai-platform."
-                    }
-                ]
+            messages = [
+                {
+                    "role": "system",
+                    "content": """
+                You are the AI assistant inside ai-platform.
 
-                # Add historical messages
-                messages.extend([
-                    {
-                        "role": msg.role,
-                        "content": msg.content
-                    }
-                    for msg in history
-                ])
+                You must ALWAYS continue the ongoing conversation.
 
-                # ---------------------------
-                # LLM CALL
-                # ---------------------------
+                The user may refer to previous messages using terms like:
+                - "optimize it"
+                - "fix this"
+                - "improve this"
+                - "explain further"
+                - "rewrite it"
 
-                with tracer.start_as_current_span("llm.generate_response"):
-                    response_text = llm_service.generate_response(
-                        messages=messages,
-                        model=request.model,
-                        stream=request.stream
-                    )
+                You MUST use previous conversation context to understand what "it" refers to.
+
+                If earlier code exists in the conversation,
+                assume follow-up requests refer to that code unless explicitly changed.
+
+                Be concise, technical, and helpful.
+                """
+                }
+            ]
+
+            # Add historical messages
+            messages.extend([
+                {
+                    "role": msg.role,
+                    "content": msg.content
+                }
+                for msg in history
+            ])
+
+            # ---------------------------
+            # LLM CALL
+            # ---------------------------
+
+            with tracer.start_as_current_span("llm.generate_response"):
+                response_text = llm_service.generate_response(
+                    messages=messages,
+                    model=request.model,
+                    stream=request.stream
+                )
 
         except Exception as e:
             span.record_exception(e)
@@ -160,3 +178,102 @@ async def chat(
             tokens=tokens,
             model=request.model
         )
+
+@router.post("/chat/stream")
+async def stream_chat(
+    request: ChatRequest,
+    db: AsyncSession = Depends(get_db)
+):
+
+    # =========================================
+    # Conversation Handling
+    # =========================================
+
+    if request.conversation_id:
+        conversation_id = request.conversation_id
+    else:
+        conversation = await conversation_service.create_conversation(db)
+        conversation_id = conversation.id
+
+    latest_message = request.messages[-1]
+
+    await conversation_service.add_message(
+        db,
+        conversation_id,
+        latest_message.role,
+        latest_message.content
+    )
+
+    # =========================================
+    # Build Full Context
+    # =========================================
+
+    history = await conversation_service.get_messages(
+        db,
+        conversation_id
+    )
+
+    messages = [
+        {
+            "role": "system",
+            "content": """
+        You are the AI assistant inside ai-platform.
+
+        You must ALWAYS continue the ongoing conversation.
+
+        The user may refer to previous messages using terms like:
+        - "optimize it"
+        - "fix this"
+        - "improve this"
+        - "explain further"
+        - "rewrite it"
+
+        You MUST use previous conversation context to understand what "it" refers to.
+
+        If earlier code exists in the conversation,
+        assume follow-up requests refer to that code unless explicitly changed.
+
+        Be concise, technical, and helpful.
+        """
+        }
+    ]
+
+    messages.extend([
+        {
+            "role": msg.role,
+            "content": msg.content
+        }
+        for msg in history
+    ])
+
+    # =========================================
+    # Streaming Generator
+    # =========================================
+
+    async def event_generator():
+
+        full_response = ""
+
+        for chunk in llm_service.stream_response(
+            messages=messages,
+            model=request.model
+        ):
+
+            full_response += chunk
+
+            yield f"data: {json.dumps({'token': chunk})}\n\n"
+
+        # Save assistant response after stream completes
+        await conversation_service.add_message(
+            db,
+            conversation_id,
+            "assistant",
+            full_response
+        )
+
+        yield f"data: {json.dumps({'done': True})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
