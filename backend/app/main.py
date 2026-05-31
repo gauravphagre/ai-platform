@@ -1,20 +1,26 @@
 import logging
 
 from contextlib import asynccontextmanager
-
+from app.api.health.health import router as health_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from app.api.routes import rag
+from app.api.rag.rag import router as rag
 from prometheus_client import generate_latest
 
-from app.routes.chat import router as chat_router
+from app.api.chat.chat import router as chat_router
+from app.api.workflows.workflows import router as workflows_router
 from app.observability.telemetry import setup_telemetry
 
-from app.db.database import engine
-from app.db.database import Base
+from app.infrastructure.database.database import engine
+from app.infrastructure.database.database import Base
 
-from app.routes.conversations import router as conversations_router
+from app.api.conversations.conversations import router as conversations_router
+from app.infrastructure.database.models import (
+    Conversation,
+    Message,
+)
+
 
 # Configure logger
 logging.basicConfig(level=logging.INFO)
@@ -52,11 +58,14 @@ app.include_router(chat_router)
 
 app.include_router(conversations_router)
 
-
 app.include_router(
-    rag.router,
+    rag,
     prefix="/rag",
 )
+
+app.include_router(workflows_router)
+
+app.include_router(health_router)
 
 @app.get("/")
 def home():

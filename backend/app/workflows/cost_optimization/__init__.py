@@ -1,0 +1,2 @@
+"""Cost optimization workflow placeholder."""
+

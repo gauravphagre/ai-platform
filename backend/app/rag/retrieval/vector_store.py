@@ -53,3 +53,18 @@ def store_chunks(chunks, embeddings):
         collection_name=COLLECTION_NAME,
         points=points
     )
+
+def search_similar_chunks(
+    query_embedding,
+    limit: int = 3
+):
+    results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_embedding,
+        limit=limit
+    )
+
+    return [
+        hit.payload["text"]
+        for hit in results.points
+    ]

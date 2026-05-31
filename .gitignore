@@ -1,4 +1,173 @@
+# Existing entries
 .idea
 data/
 frontend/node_modules
 security/trivy
+
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+backend/venv/
+backend/ENV/
+
+# ============================================================
+# IDE & Editors
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# ============================================================
+# Testing & Coverage
+# ============================================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+
+# ============================================================
+# Logs
+# ============================================================
+*.log
+logs/
+log/
+
+# ============================================================
+# Environment Variables
+# ============================================================
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# ============================================================
+# Database Files
+# ============================================================
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+
+# ============================================================
+# Cache
+# ============================================================
+.cache/
+*.cache
+.mypy_cache/
+
+# ============================================================
+# OS Specific
+# ============================================================
+Thumbs.db
+.DS_Store
+*.swp
+.vagrant/
+*.vmdk
+
+# ============================================================
+# Node.js / Frontend
+# ============================================================
+frontend/node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+frontend/dist/
+frontend/build/
+
+# ============================================================
+# Docker & Container Related
+# ============================================================
+.dockerignore
+docker-compose.override.yml
+
+# ============================================================
+# Temporary Files
+# ============================================================
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# ============================================================
+# Backend Venv & Site Packages
+# ============================================================
+backend/Lib/
+backend/Include/
+backend/Scripts/
+backend/pyvenv.cfg
+
+# ============================================================
+# API Keys, Secrets, Credentials
+# ============================================================
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# ============================================================
+# Ollama Models & Data
+# ============================================================
+data/ollama/models/
+data/ollama/cache/
+
+# ============================================================
+# Security Scan Reports
+# ============================================================
+security/trivy/reports/
+security/trivy/metrics/
+
+# ============================================================
+# Observability Generated Files
+# ============================================================
+observability/data/
+observability/logs/
+
+# ============================================================
+# IDE Python Cache
+# ============================================================
+*.pyc
+*.pyo
+*.pyd
+.Python

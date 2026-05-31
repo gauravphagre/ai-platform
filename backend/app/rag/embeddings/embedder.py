@@ -1,17 +1,6 @@
-import requests
+from app.llm.service import LLMService
 
-OLLAMA_URL = "http://ollama:11434/api/embeddings"
-
-def generate_embedding(text: str):
-
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": "nomic-embed-text",
-            "prompt": text
-        }
-    )
-
-    data = response.json()
-
-    return data["embedding"]
+async def generate_embedding(text: str, model: str = "nomic-embed-text") -> list[float]:
+    llm_service = LLMService()
+    response = await llm_service.generate_embeddings(text=text, model=model)
+    return response.embedding

@@ -1,93 +1,29 @@
-from sqlalchemy import select
-
-from app.db.models import Conversation
-from app.db.models import Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy import select
-from app.db.models import Conversation, Message
+from app.repositories.conversation_repository import ConversationRepository
 
 
 class ConversationService:
+    async def create_conversation(self, db: AsyncSession):
+        return await ConversationRepository(db).create_conversation()
 
-    async def create_conversation(
-        self,
-        db
-    ):
-        conversation = Conversation()
-        db.add(conversation)
-        await db.commit()
-        await db.refresh(conversation)
-        return conversation
-
-    async def add_message(
-        self,
-        db,
-        conversation_id,
-        role,
-        content
-    ):
-        message = Message(
+    async def add_message(self, db: AsyncSession, conversation_id, role, content):
+        return await ConversationRepository(db).add_message(
             conversation_id=conversation_id,
             role=role,
-            content=content
+            content=content,
         )
 
-        db.add(message)
-        await db.commit()
-        return message
+    async def get_messages(self, db: AsyncSession, conversation_id: int):
+        return await ConversationRepository(db).get_messages(conversation_id)
 
-    async def get_messages(
-        self,
-        db: AsyncSession,
-        conversation_id: int
-    ):
-        result = await db.execute(
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(Message.created_at.asc())
-        )
+    async def get_all_conversations(self, db: AsyncSession):
+        conversations = await ConversationRepository(db).get_all_conversations()
+        return [{"id": c.id, "created_at": c.created_at} for c in conversations]
 
-        return result.scalars().all()
-
-    async def get_all_conversations(
-            self,
-            db: AsyncSession
-    ):
-        result = await db.execute(
-            select(Conversation).order_by(
-                Conversation.created_at.desc()
-            )
-        )
-
-        conversations = result.scalars().all()
-
+    async def get_conversation_messages(self, db: AsyncSession, conversation_id: int):
+        messages = await ConversationRepository(db).get_messages(conversation_id)
         return [
-            {
-                "id": c.id,
-                "created_at": c.created_at
-            }
-            for c in conversations
-        ]
-
-    async def get_conversation_messages(
-            self,
-            db: AsyncSession,
-            conversation_id: int
-    ):
-        result = await db.execute(
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(Message.created_at.asc())
-        )
-
-        messages = result.scalars().all()
-
-        return [
-            {
-                "role": m.role,
-                "content": m.content,
-                "created_at": m.created_at
-            }
+            {"role": m.role, "content": m.content, "created_at": m.created_at}
             for m in messages
         ]

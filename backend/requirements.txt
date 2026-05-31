@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 requests
+httpx
 python-dotenv
 opentelemetry-api
 opentelemetry-sdk
@@ -16,3 +17,5 @@ alembic
 pypdf
 qdrant-client
 python-multipart
+openai
+langgraph
