@@ -51,7 +51,12 @@ export default function ModernAIChatUI() {
 
       const data = await response.json();
 
-      setConversations(data.slice(0, 10));
+      // Ensure we show the most recent 10 conversations
+      const sorted = [...data].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setConversations(sorted.slice(0, 10));
 
     } catch (error) {
 
@@ -186,9 +191,10 @@ export default function ModernAIChatUI() {
         setActiveConversationId(
           data.conversation_id
         );
-
-        fetchConversations();
       }
+
+      // Refresh left pane so the new conversation appears immediately
+      fetchConversations();
 
       // =========================================
       // APPEND AI RESPONSE
