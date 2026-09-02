@@ -19,3 +19,4 @@ qdrant-client
 python-multipart
 openai
 langgraph
+alembic

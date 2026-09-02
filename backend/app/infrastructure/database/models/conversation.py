@@ -4,8 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.infrastructure.database.database import Base
-
+from app.infrastructure.database.base import Base
 
 class Conversation(Base):
     __tablename__ = "conversations"

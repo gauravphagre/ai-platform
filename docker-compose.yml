@@ -101,7 +101,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ai_user"]
+      test: ["CMD-SHELL", "pg_isready -U ai_user -d ai_platform"]
       interval: 30s
       timeout: 10s
       retries: 5

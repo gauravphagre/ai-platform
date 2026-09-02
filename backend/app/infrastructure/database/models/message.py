@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from app.infrastructure.database.database import Base
+from app.infrastructure.database.base import Base
 
 
 class Message(Base):
@@ -21,4 +21,3 @@ class Message(Base):
         "Conversation",
         back_populates="messages",
     )
-

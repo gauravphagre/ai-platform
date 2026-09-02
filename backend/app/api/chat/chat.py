@@ -75,6 +75,21 @@ async def chat(
 
                 conversation_id = conversation.id
 
+                # Auto-title the conversation from the first user message
+                try:
+                    first_user_msg = request.messages[-1].content
+                    title = (first_user_msg or "").strip().replace("\n", " ")
+                    title = title[:60] if len(title) > 60 else title
+                    if title:
+                        await conversation_service.set_title(
+                            db,
+                            conversation_id,
+                            title,
+                        )
+                except Exception:
+                    # Title is best-effort; don't fail chat if it can't be set
+                    pass
+
         latest_message = request.messages[-1]
 
         with tracer.start_as_current_span(

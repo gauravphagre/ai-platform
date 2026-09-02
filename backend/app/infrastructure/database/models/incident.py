@@ -3,8 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from datetime import datetime
 
-from app.infrastructure.database.database import Base
-
+from app.infrastructure.database.base import Base
 
 class Incident(Base):
     """Minimal incident persistence model (placeholder for future expansion)."""

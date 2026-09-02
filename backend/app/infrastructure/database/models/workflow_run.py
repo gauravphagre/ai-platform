@@ -3,8 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Column, Integer, String, DateTime, JSON
 from datetime import datetime, UTC
 
-from app.infrastructure.database.database import Base
-
+from app.infrastructure.database.base import Base
 
 class WorkflowRun(Base):
     """Workflow run persistence.

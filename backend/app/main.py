@@ -13,7 +13,7 @@ from app.api.workflows.workflows import router as workflows_router
 from app.observability.telemetry import setup_telemetry
 
 from app.infrastructure.database.database import engine
-from app.infrastructure.database.database import Base
+from app.infrastructure.database.base import Base
 
 from app.api.conversations.conversations import router as conversations_router
 from app.infrastructure.database.models import (
